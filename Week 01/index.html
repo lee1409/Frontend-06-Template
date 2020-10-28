@@ -31,7 +31,8 @@
             [0, 0, 0]
         ]
         let player = 1;
-        function init() {
+        let stopPlay = false;
+        function render() {
             let container = document.getElementById("tictactoe")
             container.innerHTML = ""
             for (let i = 0; i < state.length; i++) {
@@ -47,13 +48,60 @@
             }
         }
         function move(i, j) {
-            if (state[i][j] === 0) {
-                player = 3 - player
+            if (!stopPlay && state[i][j] === 0) {
                 state[i][j] = player
-                init()
+                if (isWon(i, j)) {
+                    let msg = player === 2 ? "Player X won!" : "Player O won!"
+                    stopPlay = true;
+                    console.log(msg)
+                }
+                player = 3 - player
+                render()
             }
         }
-        init();
+        render();
+
+        function isWon(i, j) {
+            for (const fn of [horizontalScan, verticalScan, tiltedLeftScan, tiltedRightScan]) {
+                let win = true
+                win = fn(i, j, win)
+                if (win) return win
+            }
+            return false
+        }
+
+        function horizontalScan(i, j, res) {
+            // Horizontal
+            for (let x = 0; x < 3; x++) {
+                res = res && isCurrentPlayer(i, x)
+            }
+            return res
+        }
+        function verticalScan(i, j, res) {
+            for (let y = 0; y < 3; y++) {
+                res = res && isCurrentPlayer(y, j)
+            }
+            return res
+        }
+
+        function tiltedRightScan(i, j, res) {
+            for (let i = 0; i < 3; i++) {
+                res = res && isCurrentPlayer(i, i)
+            }
+            return res
+        }
+
+        function tiltedLeftScan(i, j, res) {
+            for (let i = 0; i < 3; i++) {
+                res = res && isCurrentPlayer(i, 2 - i)
+            }
+            return res
+        }
+
+        function isCurrentPlayer(i, j) {
+            return state[i][j] === player
+        }
+
     </script>
 </body>
 
