@@ -50,55 +50,80 @@
         function move(i, j) {
             if (!stopPlay && state[i][j] === 0) {
                 state[i][j] = player
-                if (isWon(i, j)) {
-                    let msg = player === 2 ? "Player X won!" : "Player O won!"
+                if (isWon(i, j, state)) {
+                    console.log(`${getPlayer(player)} is won!`)
                     stopPlay = true;
-                    console.log(msg)
+                } else {
+                    player = 3 - player
+                    willWin()
                 }
-                player = 3 - player
                 render()
             }
         }
         render();
 
-        function isWon(i, j) {
+        function isWon(i, j, state) {
             for (const fn of [horizontalScan, verticalScan, tiltedLeftScan, tiltedRightScan]) {
-                let win = true
-                win = fn(i, j, win)
-                if (win) return win
+                if (fn(i, j, state)) return true
             }
             return false
         }
 
-        function horizontalScan(i, j, res) {
+        function clone(arr) {
+            return JSON.parse(JSON.stringify(arr))
+        }
+
+        function willWin () {
+            outer:for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (state[i][j]) continue
+                    let cloneState = clone(state)
+                    cloneState[i][j] = player
+                    if (isWon(i, j, cloneState)) {
+                        console.log(`${getPlayer(player)} is gonna win.`)
+                        break outer
+                    }
+                }
+            }
+        }
+
+        function getPlayer (player) {
+            return player == 2 ? "Player X" : "Player 0"
+        }
+
+        function horizontalScan(i, j, state) {
+            let res = true
             // Horizontal
             for (let x = 0; x < 3; x++) {
-                res = res && isCurrentPlayer(i, x)
+                res = res && isCurrentPlayer(i, x, state)
             }
             return res
         }
-        function verticalScan(i, j, res) {
+        function verticalScan(i, j, state) {
+            let res = true
             for (let y = 0; y < 3; y++) {
-                res = res && isCurrentPlayer(y, j)
+                res = res && isCurrentPlayer(y, j, state)
             }
             return res
         }
 
-        function tiltedRightScan(i, j, res) {
+        function tiltedRightScan(_, _, state) {
+            let res = true
             for (let i = 0; i < 3; i++) {
-                res = res && isCurrentPlayer(i, i)
+                res = res && isCurrentPlayer(i, i, state)
             }
             return res
         }
 
-        function tiltedLeftScan(i, j, res) {
+        function tiltedLeftScan(_, _, state) {
+            let res = true
             for (let i = 0; i < 3; i++) {
-                res = res && isCurrentPlayer(i, 2 - i)
+                res = res && isCurrentPlayer(i, 2 - i, state)
             }
             return res
         }
 
-        function isCurrentPlayer(i, j) {
+        function isCurrentPlayer(i, j, state) {
             return state[i][j] === player
         }
 
