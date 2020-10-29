@@ -7,7 +7,7 @@
     <title>Tic Tac Toe</title>
     <style>
         .block {
-            background-color: green;
+            background-player: green;
             width: 100px;
             height: 100px;
             line-height: 100px;
@@ -15,7 +15,7 @@
             display: inline-block;
             vertical-align: middle;
             border: 1px solid white;
-            color: red;
+            player: red;
             text-align: center;
 
         }
@@ -26,7 +26,7 @@
     <div id="tictactoe"></div>
     <script>
         let state = [
-            [0, 1, 2],
+            [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0]
         ]
@@ -42,92 +42,122 @@
                     el.innerText = state[i][j] === 2 ? "X" : state[i][j] === 1 ? '0' : ""
                     el.addEventListener('click', () => {
                         move(i, j)
+                        player = 3 - player
+                        if(p = bestChoice(player, state).point) move(...p)
+                        player = 3 - player
                     })
                     container.appendChild(el)
                 }
+                let br = document.createElement('br')
+                container.appendChild(br)
             }
         }
+
+        function bestChoice(player, state) {
+            if (p = willWin(player, state)) {
+                return {
+                    result: 1,
+                    point: p,
+                };
+            }
+
+            let result = -2;
+            let point = null;
+            outer:for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (state[i][j]) {
+                        continue;
+                    }
+                    let tmp = clone(state);
+                    tmp[i][j] = player;
+                    let r = bestChoice(3 - player, tmp).result;
+
+                    if (-r > result) {
+                        result = -r;
+                        point = [i, j];
+                    }
+                    if (result === 1) break outer;
+                }
+            }
+            return {
+                result: point ? result : 0,
+                point: point,
+            };
+        }
+
+
         function move(i, j) {
             if (!stopPlay && state[i][j] === 0) {
                 state[i][j] = player
-                if (isWon(i, j, state)) {
+                if (isWon(player, state)) {
                     console.log(`${getPlayer(player)} is won!`)
                     stopPlay = true;
-                } else {
-                    player = 3 - player
-                    willWin()
                 }
                 render()
             }
         }
-        render();
 
-        function isWon(i, j, state) {
-            for (const fn of [horizontalScan, verticalScan, tiltedLeftScan, tiltedRightScan]) {
-                if (fn(i, j, state)) return true
-            }
-            return false
+        function getPlayer(player) {
+            return player === 1 ? "0" : "X"
         }
 
         function clone(arr) {
             return JSON.parse(JSON.stringify(arr))
         }
 
-        function willWin () {
-            outer:for (let i = 0; i < 3; i++) {
+        // Return 
+        function willWin(player, state) {
+            for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
                     if (state[i][j]) continue
                     let cloneState = clone(state)
                     cloneState[i][j] = player
-                    if (isWon(i, j, cloneState)) {
-                        console.log(`${getPlayer(player)} is gonna win.`)
-                        break outer
+                    if (isWon(player, cloneState)) {
+                        // Output coordinate that can make you win
+                        return [i, j]
                     }
                 }
             }
+            return null
         }
 
-        function getPlayer (player) {
-            return player == 2 ? "Player X" : "Player 0"
-        }
-
-        function horizontalScan(i, j, state) {
-            let res = true
-            // Horizontal
-            for (let x = 0; x < 3; x++) {
-                res = res && isCurrentPlayer(i, x, state)
+        // Return boolean
+        function isWon(player, state) {
+            // Horizontal Scanning
+            for (let i = 0; i < 3; i++) {
+                let res = true
+                for (let j = 0; j < 3; j++) {
+                    if (state[i][j] !== player) {
+                        res = false
+                    };
+                }
+                if (res) return res
             }
-            return res
-        }
-        function verticalScan(i, j, state) {
-            let res = true
-            for (let y = 0; y < 3; y++) {
-                res = res && isCurrentPlayer(y, j, state)
+            // Vertical
+            for (let i = 0; i < 3; i++) {
+                let res = true
+                for (let j = 0; j < 3; j++) {
+                    if (state[j][i] !== player) {
+                        res = false
+                    };
+                }
+                if (res) return res
             }
-            return res
-        }
 
-        function tiltedRightScan(_, _, state) {
             let res = true
             for (let i = 0; i < 3; i++) {
-                res = res && isCurrentPlayer(i, i, state)
+                if (state[i][i] !== player) res = false
             }
-            return res
-        }
+            if (res) return res
 
-        function tiltedLeftScan(_, _, state) {
-            let res = true
+            res = true
             for (let i = 0; i < 3; i++) {
-                res = res && isCurrentPlayer(i, 2 - i, state)
+                if (state[2 - i][i] !== player) res = false
             }
             return res
         }
-
-        function isCurrentPlayer(i, j, state) {
-            return state[i][j] === player
-        }
+        render();
 
     </script>
 </body>
-
 </html>
