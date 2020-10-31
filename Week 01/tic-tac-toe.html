@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        .block {
+            display: inline-block;
+            background-color: green;
+            color: red;
+            text-align: center;
+            font-size: 50px;
+            vertical-align: middle;
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="tictactoe"></div>
+
+    <script>
+        let state = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+        let player = 1
+        let d = 3
+        let isPlayed = true
+
+
+        function render () {
+            const container = document.getElementById("tictactoe")
+            container.innerHTML = ""
+            for (let i = 0; i < d; i++) {
+                for (let j = 0; j < d; j++) {
+                    const block = document.createElement('div')
+                    block.classList.add('block')
+                    block.innerText = getPlayer(state[i][j])
+                    block.addEventListener("click", () => handleClick(i, j))
+                    container.appendChild(block)
+                }
+                const divider = document.createElement('br')
+                container.appendChild(divider)
+            }
+        }
+
+        /**
+         * @param {number} i 
+         * @param {number} j
+        */ 
+        function move(i, j, state) {
+            if (state[i][j] === 0) {
+                state[i][j] = player
+            }
+            if (isWon(player, state)) {
+                isPlayed = false // Game Over
+                console.log(`${getPlayer(player)} win`)
+            } else [
+                player = changePlayer(player)
+            ]
+            render()  
+        }
+
+        function handleClick (i, j) {
+            if (!isPlayed) return
+            move(i, j, state)
+            const {move: computerMove} = bestChoice(player, state)
+            if (computerMove) move(...computerMove, state)
+        }
+
+        // Given current player and best state
+        // Output best result and best move
+        function bestChoice (player, state) {
+            // Result
+            // Win: 1, Lose: -1, Draw: 0, 
+            let move;
+            if (move = willWin(player, state)) return {
+                result: 1,
+                move
+            }
+            let result = -2
+            outer:for (let i = 0; i < d; i++) {
+                for (let j = 0; j < d; j++) {
+                    if (state[i][j]) continue
+                    const clone = copy(state)
+                    clone[i][j] = player
+                    
+                    const oppRes = bestChoice(changePlayer(player), clone)
+                    // OppRes worst === me best
+                    if (-oppRes.result > result) {
+                        result = -oppRes.result
+                        move = [i, j]
+                    }
+                    if (result === 1) break outer
+                }
+            }
+            return {
+                result: move ? result : 0,
+                move
+            }
+        }
+
+        // Get player and see will he win?
+        // Which coordinate he will win
+        function willWin (player, state) {
+            // Filll up every player
+            const clone = copy(state)
+            for (let i = 0; i < d; i++) {
+                for (let j = 0; j < d; j++) {
+                    if (clone[i][j] === 0) {
+                        clone[i][j] = player
+                        if (isWon(player, clone)) return [i, j]
+                        clone[i][j] = 0 // Reset back
+                    }
+                }
+            }
+            return null
+        }
+
+        function copy (state) {
+            return JSON.parse(JSON.stringify(state))
+        }
+
+        // Is player won given current state?
+        function isWon(player, state) {
+            // Horizontal Scan
+            for (let i = 0; i < d; i++) {
+                let player = state[i][0]
+                let res = true
+                for (let j = 0; j < d; j++) {
+                    if (player !== state[i][j] || player === 0) res = false
+                }
+                if (res) return true
+            }
+
+            // Vertical
+            for (let i = 0; i < d; i++) {
+                const player = state[0][i]
+                let res = true
+                for (let j = 0; j < d; j++) {
+                    if (player !== state[j][i] || player === 0) res = false
+                }
+                if (res) return true
+            }
+
+            // Tilted
+            // Left starting
+            {
+                const player = state[0][0]
+                let res = true
+                for (let i = 0; i < d; i++) {
+                    if (player !== state[i][i] || player === 0) res = false
+                }
+                if (res) return true
+            }
+            // Right starting
+            {
+                const player = state[2][0]
+                let res = true
+                for (let i = 0; i < d; i++) {
+                    if (player !== state[2-i][i] || player === 0) res = false
+                }
+                if (res) return true
+            }
+
+            return false
+        }
+
+        function changePlayer (player) {
+            player = 3 - player
+            return player
+        }
+
+        function getPlayer(player) {
+            return player === 1 ? "X" : player === 2 ? "0" : ""
+        }
+
+        render()
+    </script>
+</body>
+</html>
