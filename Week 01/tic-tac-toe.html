@@ -24,11 +24,7 @@
     <div id="tictactoe"></div>
 
     <script>
-        let state = [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]
+        let state = Array(9).fill(0)
         let player = 1
         let d = 3
         let isPlayed = true
@@ -41,7 +37,7 @@
                 for (let j = 0; j < d; j++) {
                     const block = document.createElement('div')
                     block.classList.add('block')
-                    block.innerText = getPlayer(state[i][j])
+                    block.innerText = getPlayer(state[i*3 + j])
                     block.addEventListener("click", () => handleClick(i, j))
                     container.appendChild(block)
                 }
@@ -55,8 +51,8 @@
          * @param {number} j
         */ 
         function move(i, j, state) {
-            if (state[i][j] === 0) {
-                state[i][j] = player
+            if (state[i*3+j] === 0) {
+                state[i*3+j] = player
             }
             if (isWon(player, state)) {
                 isPlayed = false // Game Over
@@ -87,9 +83,9 @@
             let result = -2
             outer:for (let i = 0; i < d; i++) {
                 for (let j = 0; j < d; j++) {
-                    if (state[i][j]) continue
+                    if (state[i*3+j]) continue
                     const clone = copy(state)
-                    clone[i][j] = player
+                    clone[i*3+j] = player
                     
                     const oppRes = bestChoice(changePlayer(player), clone)
                     // OppRes worst === me best
@@ -113,10 +109,10 @@
             const clone = copy(state)
             for (let i = 0; i < d; i++) {
                 for (let j = 0; j < d; j++) {
-                    if (clone[i][j] === 0) {
-                        clone[i][j] = player
+                    if (clone[i*3+j] === 0) {
+                        clone[i*3+j] = player
                         if (isWon(player, clone)) return [i, j]
-                        clone[i][j] = 0 // Reset back
+                        clone[i*3+j] = 0 // Reset back
                     }
                 }
             }
@@ -124,27 +120,27 @@
         }
 
         function copy (state) {
-            return JSON.parse(JSON.stringify(state))
+            return Object.create(state)
         }
 
         // Is player won given current state?
         function isWon(player, state) {
             // Horizontal Scan
             for (let i = 0; i < d; i++) {
-                let player = state[i][0]
+                let player = state[i*3]
                 let res = true
                 for (let j = 0; j < d; j++) {
-                    if (player !== state[i][j] || player === 0) res = false
+                    if (player !== state[i*3+j] || player === 0) res = false
                 }
                 if (res) return true
             }
 
             // Vertical
             for (let i = 0; i < d; i++) {
-                const player = state[0][i]
+                const player = state[i]
                 let res = true
                 for (let j = 0; j < d; j++) {
-                    if (player !== state[j][i] || player === 0) res = false
+                    if (player !== state[j*3+i] || player === 0) res = false
                 }
                 if (res) return true
             }
@@ -152,19 +148,19 @@
             // Tilted
             // Left starting
             {
-                const player = state[0][0]
+                const player = state[0]
                 let res = true
                 for (let i = 0; i < d; i++) {
-                    if (player !== state[i][i] || player === 0) res = false
+                    if (player !== state[i*3+i] || player === 0) res = false
                 }
                 if (res) return true
             }
             // Right starting
             {
-                const player = state[2][0]
+                const player = state[2*3]
                 let res = true
                 for (let i = 0; i < d; i++) {
-                    if (player !== state[2-i][i] || player === 0) res = false
+                    if (player !== state[(2-i)*3 + i] || player === 0) res = false
                 }
                 if (res) return true
             }
