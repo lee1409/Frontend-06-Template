@@ -30,11 +30,11 @@
 3. Generator + Promise
 4. Async + generator
 
-## Callback
+### Callback
 
 1. 问题：产生层级嵌套（callback hell）
 
-## Promise
+### Promise
 
 1. 解决callback问题
 2. Tips
@@ -53,7 +53,7 @@ function happen(element, eventName) {
 }
 ```
 
-## Generator
+### Generator
 
 1. 早年没async函数的时候，来模拟async
 
@@ -85,7 +85,7 @@ function co(generator) {
 go = co(go);
 ```
 
-## Async Generator
+### Async Generator
 
 Ref: https://github.com/jhusain/asyncgenerator
 
@@ -119,3 +119,30 @@ async function* timer(){
     }
 })();
 ```
+
+## 注意事项
+
+### Closure
+
+```js
+// Primitive
+let f = 0;
+function addTen(f) {
+  f += 10
+  return f
+}
+addTen(f)
+console.log(f) // 0
+
+// Object
+let state = [1]
+function addTen(f) {
+  f[0] = 2
+  return f
+}
+addTen(state)
+console.log(state[0]) // 2
+```
+
+### Chrome
+1. If forgot to declare `let`, Chrome will not raise error.
