@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Light</title>
+
+    <style>
+        .traffic {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            border-radius: 100%;
+            background-color: gray;
+            margin-right: 12px;
+        }
+
+        .green.light {
+            background-color: green;
+        }
+
+        .yellow.light {
+            background-color: yellow;
+        }
+
+        .red.light {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        // Callback
+        function lightUp(id) {
+            const nodes = document.getElementsByClassName('traffic')
+            for (let node of nodes) {
+                if (node.classList.contains(id)) {
+                    node.classList.add("light")
+                } else {
+                    node.classList.remove("light")
+                }
+            }
+        }
+
+        function callback() {
+            lightUp("green")
+            return setTimeout(() => {
+                lightUp("yellow")
+                return setTimeout(() => {
+                    lightUp("red")
+                    return setTimeout(callback, 5000)
+                }, 2000)
+            }, 10000)
+        }
+
+        // Async
+        function sleep(t) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, t)
+            })
+        }
+
+        async function promise() {
+            while (true) {
+                lightUp("green")
+                await sleep(10000)
+                lightUp('yellow')
+                await sleep(2000)
+                lightUp('red')
+                await sleep(5000)
+            }
+        }
+
+        // Init
+        const el = document.createElement('div')
+        for (let i of ["red", "yellow", "green"]) {
+            const light = document.createElement('div')
+            light.classList.add('traffic')
+            light.classList.add(i)
+            el.appendChild(light)
+        }
+        document.body.appendChild(el)
+        promise()
+    </script>
+</body>
+
+</html>
