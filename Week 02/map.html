@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <style>
+        .block {
+            flex: 0 0 7px;
+            height: 7px;
+            line-height: 8px;
+            background-color: gray;
+            border: 0.1px solid white;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        #map {
+            display: flex;
+            flex-wrap: wrap;
+            width: 700px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <button id="save" onclick="localStorage.setItem('map', JSON.stringify(state));alert('Map is saved!');">Save</button>
+    <script>
+        let state = JSON.parse(localStorage.getItem("map")) || Array(100 * 100).fill(0);
+        let container = document.getElementById("map");
+        function init() {
+            for (let i = 0; i < 100; i++) {
+                for (let j = 0; j < 100; j++) {
+                    const el = document.createElement("div");
+                    el.classList.add("block");
+                    if (state[i * 100 + j] === 1) el.style.backgroundColor = "black";
+                    el.addEventListener("mousemove", () => {
+                        if (mousedown) {
+                            if (!clear) {
+                                el.style.backgroundColor = "black";
+                                state[i * 100 + j] = 1;
+                            } else {
+                                el.style.backgroundColor = "";
+                                state[i * 100 + j] = 0;
+                            }
+                        }
+                    });
+                    container.appendChild(el);
+                }
+            }
+        }
+        let mousedown = false;
+        let clear = false;
+
+        document.addEventListener("mousedown", (e) => {
+            mousedown = true;
+            clear = e.which === 3;
+        });
+        document.addEventListener("mouseup", () => {
+            mousedown = false;
+        });
+
+        document.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
+
+        function handleClick() {
+            localStorage.setItem("map", JSON.stringify(state));
+            alert("Map is saved!");
+        }
+
+        function sleep(t) {
+            return new Promise((resolve) => setTimeout(resolve, t));
+        }
+
+        function distance (a, b) {
+            return (a[0] - b[0])**2 + (a[1] - b[1])**2;
+        }
+
+        async function path(state, start, end) {
+            let clone = Object.create(state);
+            let container = document.getElementById("map");
+            let priorityQueue = new MinHeap((a, b) => distance(a, end) - distance(b, end), start)
+            async function insert(x, y, pre) {
+                // Obstacle
+                if (x >= 100 || x < 0 || y >= 100 || y < 0) {
+                    return;
+                }
+                // or visited
+                if (clone[y * 100 + x]) {
+                    return;
+                }
+                container.children[y * 100 + x].style.backgroundColor = "red";
+                clone[y * 100 + x] = pre; // Mark as visitied
+                priorityQueue.push([x, y]);
+            }
+
+            while (priorityQueue.length) {
+                let [x, y] = priorityQueue.pop();
+                if (x === end[0] && y === end[1]) {
+                    let path = [];
+                    while (x !== start[0] || y !== start[1]) {
+                        path.push(state[y * 100 + x]);
+                        [x, y] = clone[y * 100 + x];
+                        await sleep(10);
+                        container.children[y * 100 + x].style.backgroundColor = "purple";
+                    }
+                    return path;
+                }
+                await insert(x + 1, y, [x, y]);
+                await insert(x - 1, y, [x, y]);
+                await insert(x, y + 1, [x, y]);
+                await insert(x, y - 1, [x, y]);
+
+                await insert(x + 1, y + 1, [x, y]);
+                await insert(x - 1, y - 1, [x, y]);
+                await insert(x + 1, y - 1, [x, y]);
+                await insert(x - 1, y + 1, [x, y]);
+            }
+            return null;
+        }
+
+
+
+        class MinHeap {
+            constructor(compare, ...data) {
+                this.heap = [null, ...data];
+                this.compare = compare || ((a,b) => a-b)
+            }
+
+            push(element) {
+                this.heap.push(element);
+                this.heapifyUp();
+            }
+
+            pop() {
+                if (this.heap.length === 1) return; // Prevent popping out null
+                this.swap(1, this.heap.length - 1); // Swap the first with the last element
+                const smallest = this.heap.pop();
+                this.heapifyDown();
+                return smallest;
+            }
+
+            heapifyDown() {
+                if (this.heap.length <= 2) return;
+                let i = 1;
+                while (i < this.heap.length) {
+                    let leftChild = i * 2;
+                    let rightChild = i * 2 + 1;
+                    let swapTarget = i;
+                    if (this.heap[leftChild] && this.compare(this.heap[swapTarget], this.heap[leftChild]) > 0) {
+                        swapTarget = leftChild;
+                    }
+                    if (this.heap[rightChild] && this.compare(this.heap[swapTarget],this.heap[rightChild]) > 0) {
+                        swapTarget = rightChild;
+                    }
+                    // Cannot swap because if i is the smallest
+                    if (i === swapTarget) return;
+                    this.swap(i, swapTarget);
+                    // Go to the next depth
+                    i = swapTarget;
+                }
+            }
+
+            heapifyUp() {
+                if (this.heap.length <= 2) return;
+                let i = this.heap.length - 1;
+
+                while (true) {
+                    let parent = Math.floor(i / 2);
+                    if (parent === 0) return
+                    if (this.compare(this.heap[i], this.heap[parent]) < 0) {
+                        this.swap(i, parent);
+                        i = parent;
+                    } else {
+                        break
+                    }
+                }
+            }
+
+            swap(i, j) {
+                const tmp = this.heap[i];
+                this.heap[i] = this.heap[j];
+                this.heap[j] = tmp;
+            }
+
+            get length () {
+                // Exclude null
+                return this.heap.length - 1 
+            }
+        }
+        init()
+    </script>
+</body>
+
+</html>
