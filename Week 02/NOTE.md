@@ -44,7 +44,7 @@ Time and Space complexity: O(|V|) where |V| is then number of vertices, if V is 
 2. 特别注意的地方是shift()的时候都是先跟最小的queue拿起
 3. 这样能把O(n^d)降到O(n^(d/2))
 
-条件
+### 条件
 1. 必须知道起点和终点
 2. Branching factor 必须两边都一样
 
@@ -57,9 +57,7 @@ Time and Space complexity: O(|V|) where |V| is then number of vertices, if V is 
 ## A* Search
 
 1. 如果每一个路程的cost都是1的话，Dijkstra 基本上就是一个暴力的BFS
-2. 找出当前与终点最短的。（除了斜着走，那就会是`Math.sqrt(2)`)
-
-因此我们可以利用Euclidean distance 来计算
+2. 利用Euclidean distance 找出当前与终点最短的距离。（斜着走，那就会是`Math.sqrt(2)`)
 
 ## Extra
 
@@ -76,4 +74,4 @@ for (let i of Array(4).keys())
 ```
 
 ## 注意事项
-1. 需要注意Array是Object，不能直接拿来对比
+1. Array是Object，不能直接拿来对比
