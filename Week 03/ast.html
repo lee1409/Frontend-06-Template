@@ -8,17 +8,39 @@
 <body>
     <script>
         let regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g
-        let identifier = ["Number", "Whitespace", "Newline", "*", "/", "+", "-"]
-        function tokenize(source) {
+        let identifier = ["Number", "Whitespace", "LineTerminator", "*", "/", "+", "-"]
+
+        function* tokenize(source) {
             let match;
-            while ((match = regexp.exec(source)) !== null) {
+            let lastIndex;
+            while (true) {
+                lastIndex = regexp.lastIndex;
+                match = regexp.exec(source);
+
+                if (!match) break;
+
+                if (regexp.lastIndex - lastIndex > match[0].length) break;
+
+                let token = {
+                    type: null,
+                    value: null,
+                }
+
                 for (let i = 1; i < identifier.length; i++) {
                     if (match[i]) {
-                        console.log(identifier[i - 1])
+                        token.type = identifier[i - 1];
                     }
                 }
-                console.log(match);
+                token.value = match[0];
+                yield token;
             }
+            yield {
+                type: "EOF"
+            }
+        }
+
+        for (let i of tokenize("1024 + 1024 * 5")) {
+            console.log(i)
         }
     </script>
 </body>
