@@ -102,10 +102,10 @@
                 if (x === end[0] && y === end[1]) {
                     let path = [];
                     while (x !== start[0] || y !== start[1]) {
+                        container.children[y * 100 + x].style.backgroundColor = "purple";
                         path.push(state[y * 100 + x]);
                         [x, y] = clone[y * 100 + x];
                         await sleep(10);
-                        container.children[y * 100 + x].style.backgroundColor = "purple";
                     }
                     return path;
                 }
