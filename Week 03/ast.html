@@ -38,10 +38,105 @@
                 type: "EOF"
             }
         }
-
-        for (let i of tokenize("1024 + 1024 * 5")) {
-            console.log(i)
+        let source = []
+        for (let token of tokenize("1024 * 5")) {
+            if (token.type !== 'Whitespace' && token.value !== 'LineTerminator') source.push(token)
         }
+
+        function expression(source) {
+            if (source[0].type === 'Additive' && source[1] && source[1].type === 'EOF') {
+                let node = {
+                    type: 'Expression',
+                    children: [source.shift(), source.shift()]
+                }
+                source.unshift(node);
+                return source;
+            }
+            additiveExpression(source);
+            return expression(source);
+        }
+
+        function additiveExpression(source) {
+            if (source[0].type === 'Multiplicative') {
+                let node = {
+                    type: "Additive",
+                    children: [source[0]]
+                };
+                source[0] = node;
+                return additiveExpression(source);
+            }
+            if (source[0].type === "Additive" && source[1] && source[1].type === "+") {
+                let node = {
+                    type: 'Additive',
+                    operator: '+',
+                    children: []
+                };
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                multiplicativeExpression(source);
+                node.children.push(source.shift());
+                source.unshift(node);
+                return additiveExpression(source);
+            }
+            if (source[0].type === 'Additive' && source[1] && source[1].type === '-') {
+                let node = {
+                    type: 'Additive',
+                    operator: '-',
+                    children: []
+                };
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                multiplicativeExpression(source);
+                node.children.push(source.shift());
+                source.unshift(node);
+                return additiveExpression(source)
+            }
+            if (source[0].type === 'Additive') {
+                return source[0];
+            }
+            multiplicativeExpression(source);
+            return additiveExpression(source);
+        }
+
+        function multiplicativeExpression(source) {
+            if (source[0].type === "Number") {
+                let node = {
+                    type: "Multiplicative",
+                    children: [source[0]]
+                }
+                source[0] = node;
+                return multiplicativeExpression(source);
+            }
+            if (source[0].type === "Multiplicative" && source[1] && source[1].type === "*") {
+                let node = {
+                    type: "Multiplicative",
+                    operator:"*",
+                    children: []
+                }
+                node.children.push(source.shift())
+                node.children.push(source.shift())
+                node.children.push(source.shift())
+                source.unshift(node)
+                return multiplicativeExpression(source)
+            }
+            if (source[0].type === "Multiplicative" && source[1] && source[1].type === "/") {
+                let node = {
+                    type: "Multiplicative",
+                    operator:"/",
+                    children: []
+                }
+                node.children.push(source.shift())
+                node.children.push(source.shift())
+                node.children.push(source.shift())
+                source.unshift(node)
+                return multiplicativeExpression(source)
+            }
+            if (source[0].type === "Multiplicative") {
+                return source[0]
+            }
+            return multiplicativeExpression(source)
+        }
+        console.log(expression(source))
     </script>
 </body>
 </html>
