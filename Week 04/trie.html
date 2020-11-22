@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let $ = Symbol("$");
+        class Tries {
+            constructor() {
+                this.root = {}
+            }
+            
+            insert(word) {
+                let node = this.root;
+                for (let i of word) {
+                    if (!node[i]) node[i] = {}
+                    node = node[i]
+                }
+                if (!node[$]) {
+                    node[$] = 0
+                }
+                node[$]++;
+            }
+            most () {
+                let maxWord = "";
+                let max = 0; 
+                let visit = (node, word) {
+                    if (node[$] && node[$] > max) {
+                        maxWord = word;
+                        max = node[$]
+                    }
+                    for (let i in node) {
+                        visit(node[i], word + i);
+                    }
+                }
+                visit(this.root, "");
+                return maxWord;
+            }
+        }
+    </script>
+</body>
+</html>
