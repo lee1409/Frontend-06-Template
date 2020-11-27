@@ -1,0 +1,67 @@
+<input id="r" type="range" min="0" max="255">
+<input id="g" type="range" min="0" max="255">
+<input id="b" type="range" min="0" max="255">
+<div id="container" style="width: 100px; height: 100px;"></div>
+<script>
+    let obj = {
+        r: 0,
+        g: 0,
+        b: 0,
+    }
+    let callbacks = new Map();
+    let usedReactivities = [];
+    let reactivity = new Map();
+
+    function effect(callback) {
+        usedReactivities = [];
+        callback();
+
+        for (const reactivity of usedReactivities) {
+            // Doesnt have key
+            if (!callbacks.has(reactivity[0])) {
+                callbacks.set(reactivity[0], new Map());
+            }
+            if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+                callbacks.get(reactivity[0]).set(reactivity[1], []);
+            }
+            callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);
+        }
+    }
+
+    function reactive(obj) {
+        if (reactivity.has(obj)) {
+            return reactivity.get(obj);
+        }
+        let po = new Proxy(obj, {
+            set(target, props, value) {
+                if (callbacks.get(target)) {
+                    if (callbacks.get(target).get(props)) {
+
+                        for (const callback of callbacks.get(target).get(props)) {
+                            callback();
+                        }
+                    }
+                }
+                
+                target[props] = value;
+            },
+            get(target, props) {
+                usedReactivities.push([target, props]);
+                if (typeof obj[props] === 'object') {
+                    return reactive(obj[props]);
+                }
+                return target[props];
+            }
+        });
+        reactivity.set(obj, po);
+        return reactivity.get(obj);
+    }
+    let po = reactive(obj);
+
+    effect(() => {
+        document.getElementById('container').style.backgroundColor=`rgb(${po.r},${po.g},${po.b})`;
+    })
+    document.getElementById('r').addEventListener('input', (e) => po.r = e.target.value);
+    document.getElementById('g').addEventListener('input', (e) => po.g = e.target.value);
+    document.getElementById('b').addEventListener('input', (e) => po.b = e.target.value);
+</script>

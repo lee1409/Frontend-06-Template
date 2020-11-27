@@ -1,0 +1,85 @@
+
+<div id="container">
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+</div>
+<div id="draggable" style="display: inline-block; width: 100px; height: 100px; background-color: blue;"></div>
+<script>
+    let draggable = document.getElementById('draggable');
+    let baseX = 0; 
+    let baseY = 0;
+    draggable.addEventListener('mousedown', (e) => {
+        let startX = e.clientX, startY = e.clientY;
+        let move = (e) => {
+            // draggable.style.transform = `translate(${baseX + e.clientX - startX}px, ${baseY + e.clientY - startY}px)`;
+            let range = getNearest(e.clientX, e.clientY);
+            range.insertNode(draggable);
+        }
+        let up = (e) => {
+            baseX = baseX + e.clientX - startX;
+            baseY = baseY + e.clientY - startY;
+            document.removeEventListener("mouseup", up);
+            document.removeEventListener("mousemove", move);
+        }
+
+        document.addEventListener("mousemove", move);
+        document.addEventListener("mouseup", up);
+    })
+    let ranges = [];
+    let container = document.getElementById('container');
+
+    for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+        let range = document.createRange();
+        range.setStart(container.childNodes[0], i);
+        range.setEnd(container.childNodes[0], i);
+        ranges.push(range);
+    }
+
+    function getNearest(x, y) {
+        let min = Infinity;
+        let minRange = null;
+
+        for (let range of ranges) {
+            const rec = range.getBoundingClientRect();
+            const dist = (rec.x - x) ** 2 + (rec.y - y) ** 2;
+            if (dist < min) {
+                min = dist;
+                minRange = range; 
+            }
+        }
+        return minRange;
+    }
+
+
+
+
+    document.getElementById('container').addEventListener("selectstart", (e) => e.preventDefault())
+</script>
