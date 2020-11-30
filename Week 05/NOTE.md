@@ -74,7 +74,11 @@
 1. 只做监听需要的effect
 2. 深度监听对象
 
+### Range
+
+1. insertNode 并不会拷贝新的node，还是会调用旧的node
+2. document mousemove listener可以听浏览器以外的位置
+
 ### 注意
 
 1. 必须先查找是否对象有没有key，要不然会有报错的风险。
-2. 
