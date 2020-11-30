@@ -42,7 +42,7 @@
                         }
                     }
                 }
-                
+
                 target[props] = value;
             },
             get(target, props) {
@@ -59,7 +59,16 @@
     let po = reactive(obj);
 
     effect(() => {
-        document.getElementById('container').style.backgroundColor=`rgb(${po.r},${po.g},${po.b})`;
+        document.getElementById('container').style.backgroundColor = `rgb(${po.r},${po.g},${po.b})`;
+    })
+    effect(() => {
+        document.getElementById('r').value = po.r;
+    })
+    effect(() => {
+        document.getElementById('g').value = po.g;
+    })
+    effect(() => {
+        document.getElementById('b').value = po.b;
     })
     document.getElementById('r').addEventListener('input', (e) => po.r = e.target.value);
     document.getElementById('g').addEventListener('input', (e) => po.g = e.target.value);
