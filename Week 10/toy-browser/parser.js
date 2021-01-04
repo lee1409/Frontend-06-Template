@@ -1,4 +1,5 @@
 const css = require('css');
+const layout = require('./layout')
 
 let currentToken = null;
 let currentAttribute = null;
@@ -154,6 +155,7 @@ function emit(token) {
       if (top.tagName === 'style') {
         addCssRules(top.children[0].content);
       }
+      layout(top)
       stack.pop()
     }
     currentTextNode = null;
