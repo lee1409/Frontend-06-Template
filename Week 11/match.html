@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <div id='id' class="class"></div>
+        <div id="abc"></div>
+    </div>
+    <script>
+        function match (selectors, document) {
+            let arr = selectors.split(' ');
+            let node = document;
+            while (arr.length) {
+                let selector = arr.pop();
+                let reg = new RegExp(/(\.\w+)|(^\#\w+)|(\w+)/g);
+                
+                while (p = reg.exec(selector)) {
+                    if (p[1]){
+                        if (!node.classList.contains(p[0].slice(1))) return false;
+                    }
+                    else if (p[2]) {
+                        if (node.id !== p[2].slice(1)) return false;
+                    }
+                    else if (p[3]) {
+                        if (node.tagName !== p[3].toUpperCase()) return false;
+                    }
+                }
+                node = node.parentNode;
+            }
+            return true;
+        }
+        console.log(match("div #id.class", document.getElementById('id')));
+        console.log(match("div #id.class", document.getElementById('abc')));
+        console.log(match("span #id.class", document.getElementById('id')));
+    </script>
+</body>
+</html>
