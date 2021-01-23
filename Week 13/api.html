@@ -1,0 +1,77 @@
+<script>
+    let names = Object.getOwnPropertyNames(window);
+    
+    function filterOut(names, props) {
+        let set = new Set();
+        props.forEach(o => set.add(o));
+        return names.filter(e => !set.has(e));
+    }
+
+    // ECMA 262
+    names = filterOut(names, ["BigUint64Array", "console", "globalThis", "Infinity", "NaN", "undefined", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "Array", "ArrayBuffer", "BigInt", "BigInt64Array", "BigInt64Array", "Boolean", "DataView", "Date", "Error", "EvalError", "Float32Array", "Float64Array", "Function", "Int8Array", "Int16Array", "Int32Array", "Map", "Number", "Object", "Promise", "Proxy", "RangeError", "ReferenceError", "RegExp", "Set", "SharedArrayBuffer", "String", "Symbol", "SyntaxError", "TypeError", "Uint8Array", "Uint8ClampedArray", "Uint16Array", "Uint32Array", "URIError", "WeakMap", "WeakSet", "Atomics", "JSON", "Math", "Reflect"])
+
+    // Node DOM
+    names = names.filter(e => {
+        try {
+            return !(window[e].prototype instanceof Node)
+        } catch (err) {
+            return true;
+        }
+    }).filter(e => e !== "Node");
+
+    names = names.filter(e => !e.match(/^on/))
+
+    names = names.filter(e => !e.match(/^[wW]eb[Kk]it/));
+
+    // https://html.spec.whatwg.org/#window
+    names = filterOut(names, ["window", "self", "document", "name", "location", "history", "customElements", "locationbar", "menubar", "personalbar", "scrollbars", "statusbar", "toolbar", "status", "close", "closed", "stop", "focus", "blur", "frames", "length", "top", "opener", "parent", "frameElement", "open", "navigator", "originAgentCluster", "alert", "confirm", "prompt", "print", "postMessage", "PostMessageOptions"])
+
+    names = names.filter(e => e !== 'Intl');
+
+    {
+        let js = new Set();
+        names = names.filter(e => !e.match(/^WebGL/));
+    }
+
+    names = names.filter(e => !e.match(/^Audio/))
+
+    // https://encoding.spec.whatwg.org/
+    names = names.filter(e => !e.match(/^(^TextEncoder) | (^TextDecoder)/))
+
+    // https://streams.spec.whatwg.org/
+    names = names.filter(e => !e.match(/^Readable/));
+    names = names.filter(e => !e.match(/^Writable/));
+
+    names = filterOut(names, ["SyncManager"]);
+
+    // https://dom.spec.whatwg.org/
+    names = filterOut(names, ["Event", "Window", "CustomEvent", "EventTarget", "AbortController", "AbortSIgnal", "NodeList", "HTMLCollection", "MutationObserver", "MutationRecord", "Node", "Document", "DOMImplementation", "DocumentType", "DocumentFragment", "ShadowRoot", "Element", "NamedNodeMap", "Attr", "CharacterData", "Text", "CDATASection", "ProcessingInstruction", "Comment", "AbstractRange", "StaticRange", "Range", "NodeIterator", "TreeWalker", "NodeFilter", "DOMTokenList", "XPathResult", "XPathExpression", "XPathEvaluatorBase", "XPathEvaluator"])
+
+    // https://fetch.spec.whatwg.org/
+    names = filterOut(names, ["Headers", "URL", "HTTP", "fetch", "Request", "Response"])
+
+    // https://xhr.spec.whatwg.org/
+    names = filterOut(names, ["XMLHttpRequestEventTarget", "XMLHttpRequestUpload", "XMLHttpRequest"])
+
+    // https://storage.spec.whatwg.org/
+    names = filterOut(names, ["StorageManager", "NavigatorStorage"])
+
+    // https://notifications.spec.whatwg.org/#api
+    names = filterOut(names, ["Notification" ]);
+
+
+    // https://w3c.github.io/webrtc-pc/
+    names = names.filter(e => !e.match(/^RTC/))
+
+    // https://svgwg.org/svg2-draft/
+    names = names.filter(e => !e.match(/^SVG/))
+
+    // https://drafts.csswg.org/cssom/
+    names = names.filter(e => !e.match(/^StyleSheet/));
+
+    // https://drafts.csswg.org/cssom-view/
+    names = filterOut(names, ["MediaQueryList", "MediaQueryListEvent", "Screen", "CaretPosition"])
+    
+    // https://drafts.css-houdini.org/css-typed-om-1/
+    names = names.filter(e => !e.match(/^Style/));
+</script>
