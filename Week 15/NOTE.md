@@ -105,3 +105,5 @@ class Animation {
 ## Gesture
 
 1. Mouse 不支持 touch 系列
+
+![Gesture](./gesture-flow.jpg)
