@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.0.3/dist/g6.min.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        let getRealm = () => {
+            let set = new Set();
+            let map = new Map();
+
+            let objects = [
+                "parseInt",
+                "eval",
+                "isFinite",
+                "parseFloat",
+                "isNaN",
+                "Number"
+            ];
+
+            objects.forEach(o => map.set(o, window[o]))
+            
+            let realm = {
+                id: 'realm',
+                children: objects.map(o => {
+                    return {
+                        id: o,
+                        children: []
+                    }
+                })
+            }
+
+            let queue = [...realm.children];
+            while (queue.length) {
+                let child = queue.shift();
+                let id = child.id;
+                let object = map.get(id);
+
+                if (set.has(object))
+                    continue;
+                set.add(object);
+                for (let p of Object.getOwnPropertyNames(object)) {
+                    let d = Object.getOwnPropertyDescriptor(object, p);
+                    let pushChild = (type = 'value') => {
+                        let uid = type === 'value' ? `${id}.${p}` : `${id}.${p}.[${type}]`;
+                        let o = {
+                            id: uid,
+                            children: []
+                        }
+
+                        map.set(uid, d[type]);
+                        child.children.push(o);
+                        queue.push(o);
+
+                    }
+                    if ((d.value !== null && typeof d.value === "object") || (typeof d.value === "function")) {
+                        pushChild();
+                    }
+                    if (d.get)
+                        pushChild('get');
+                    if (d.set)
+                        pushChild('set');
+                }
+            }
+            return realm;
+        }
+
+        let render = data => {
+            let graph = new G6.TreeGraph({
+                container: 'container',
+                width: window.innerWidth,
+                height: window.innerHeight,
+                modes: {
+                    default: [{
+                        type: 'collapse-expand',
+                        onChange: function onChange(item, collapsed) {
+                            const data = item.get('model').data
+                            data.collapsed = collapsed;
+                            return true;
+                        },
+                    },'drag-canvas','zoom-canvas']
+                },
+                defaultNode: {
+                    size: 16,
+                    anchorPoints: [[0, 0.5], [1, 0.5]],
+                    style: {
+                        fill: '#40a9ff',
+                        stroke: '#096dd9',
+                    }
+                },
+                defaultEdge: {
+                    shape: 'cubic-horizontal',
+                    style: {
+                        stroke: '#A3B1BF'
+                    }
+                },
+                layout: {
+                    type: 'compactBox',
+                    direction: 'LR',
+                    getId(d) {
+                        return d.id;
+                    },
+                    getHeight () {
+                        return 16;
+                    },
+                    getWidth() {
+                        return 16;
+                    },
+                    getVGap() {
+                        return 10;
+                    },
+                    getHGap() {
+                        return 100;
+                    },
+                }
+            })
+
+            graph.node(function (node) {
+                return {
+                    size: 26,
+                    label: node.id,
+                    labelCfg: {
+                        position: node.children && node.children.length > 0 ? 'left': 'right'
+                    }
+                }
+            })
+            graph.data(data);
+            graph.render();
+            graph.fitView();
+        }
+
+        render(getRealm());
+    </script>
+</body>
+</html>
