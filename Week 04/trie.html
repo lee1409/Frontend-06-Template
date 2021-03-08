@@ -27,7 +27,7 @@
             most () {
                 let maxWord = "";
                 let max = 0; 
-                let visit = (node, word) {
+                let visit = (node, word) => {
                     if (node[$] && node[$] > max) {
                         maxWord = word;
                         max = node[$]
