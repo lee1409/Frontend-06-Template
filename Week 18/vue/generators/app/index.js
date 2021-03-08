@@ -48,6 +48,10 @@ module.exports = class extends Generator {
       this.templatePath("webpack.config.js"),
       this.destinationPath("webpack.config.js")
     );
+    this.fs.copyTpl(
+      this.templatePath("sample-test.js"),
+      this.destinationPath("test/sample-test.js")
+    );
   }
   install() {
     this.npmInstall(["vue"], { "save-dev": false });
